@@ -1,0 +1,67 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))];
+
+  return allTags.map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: posts
+        .filter((p) => p.data.tags?.includes(tag))
+        .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
+    },
+  }));
+}
+
+interface Props {
+  tag: string;
+  posts: any[];
+}
+
+const { tag, posts } = Astro.props;
+import { getReadingTime } from "@/utils/reading-time";
+
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+---
+
+<BaseLayout title={`#${tag}`} description={`Posts tagged with "${tag}"`}>
+  <a href="/blog" class="back-link">&larr; All Posts</a>
+  <h1 class="section-heading" style="margin: 1rem 0;">
+    Posts tagged <span class="tag-pill" style="font-size: 0.85rem;">{tag}</span>
+  </h1>
+  <p style="color: var(--color-text-faint); font-size: 0.9rem; margin-bottom: 1.5rem;">
+    {posts.length} post{posts.length !== 1 ? "s" : ""}
+  </p>
+  <ul class="post-list">
+    {posts.map((post) => (
+      <li class="post-item">
+        <a href={`/blog/${post.id}/`} class="post-title-link">
+          {post.data.title}
+        </a>
+        {post.data.description && (
+          <p class="post-excerpt">{post.data.description}</p>
+        )}
+        <div class="post-meta">
+          {post.data.tags && post.data.tags.map((t: string) => (
+            <a href={`/tags/${t}/`} class="tag-pill">{t}</a>
+          ))}
+          <time class="post-date" datetime={post.data.pubDate.toISOString()}>
+            {formatDate(post.data.pubDate)}
+          </time>
+          {post.body && (
+            <span class="reading-time">&middot; {getReadingTime(post.body)}</span>
+          )}
+        </div>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>

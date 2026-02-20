@@ -1,0 +1,88 @@
+---
+title: "PostgreSQL Indexing Strategies"
+description: "A practical guide to PostgreSQL indexes — B-tree, GIN, partial indexes, and when to use each."
+pubDate: 2026-02-05
+tags: ["database", "backend"]
+---
+
+## Why Indexes Matter
+
+Without indexes, PostgreSQL must scan every row in a table to find matching records. For a table with millions of rows, this is painfully slow.
+
+```sql
+-- Without index: sequential scan (~500ms for 1M rows)
+SELECT * FROM users WHERE email = 'tung@example.com';
+
+-- With index: index scan (~1ms)
+CREATE INDEX idx_users_email ON users(email);
+```
+
+## B-tree Indexes (Default)
+
+B-tree is the default and most common index type. It works well for equality and range queries:
+
+```sql
+CREATE INDEX idx_orders_created ON orders(created_at);
+
+-- These queries benefit from the index:
+SELECT * FROM orders WHERE created_at > '2024-01-01';
+SELECT * FROM orders WHERE created_at BETWEEN '2024-01-01' AND '2024-06-30';
+```
+
+## Composite Indexes
+
+When you frequently query by multiple columns together:
+
+```sql
+CREATE INDEX idx_orders_user_status ON orders(user_id, status);
+
+-- ✅ Uses the index (matches left-to-right)
+SELECT * FROM orders WHERE user_id = 123;
+SELECT * FROM orders WHERE user_id = 123 AND status = 'pending';
+
+-- ❌ Cannot use the index
+SELECT * FROM orders WHERE status = 'pending';
+```
+
+## GIN Indexes
+
+GIN (Generalized Inverted Index) is ideal for full-text search, JSONB, and array columns:
+
+```sql
+CREATE INDEX idx_posts_tags ON posts USING GIN(tags);
+
+-- Fast array containment queries
+SELECT * FROM posts WHERE tags @> ARRAY['go', 'backend'];
+```
+
+## Partial Indexes
+
+Index only a subset of rows to save space and improve performance:
+
+```sql
+CREATE INDEX idx_orders_pending ON orders(created_at)
+WHERE status = 'pending';
+```
+
+This index is smaller and faster because it only includes pending orders.
+
+## EXPLAIN ANALYZE
+
+Always verify your indexes are being used:
+
+```sql
+EXPLAIN ANALYZE SELECT * FROM users WHERE email = 'tung@example.com';
+```
+
+Look for `Index Scan` rather than `Seq Scan` in the output.
+
+## Summary
+
+| Index Type | Best For |
+|---|---|
+| B-tree | Equality, ranges, sorting |
+| GIN | JSONB, arrays, full-text search |
+| Partial | Frequently filtered subsets |
+| Composite | Multi-column queries |
+
+Start with the queries you run most, then add indexes strategically. Too many indexes slow down writes.

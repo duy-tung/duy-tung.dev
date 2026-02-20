@@ -1,0 +1,215 @@
+---
+title: "Building REST APIs in Go"
+description: "A practical guide to building production-ready REST APIs in Go using the standard library and best practices."
+pubDate: 2026-02-20
+tags: ["go", "backend", "api"]
+---
+
+## Project Setup
+
+Start by initializing a Go module and setting up the basic project structure.
+
+### Directory Structure
+
+A clean project layout helps maintain code as it grows:
+
+```go
+myapi/
+├── cmd/
+│   └── server/
+│       └── main.go
+├── internal/
+│   ├── handler/
+│   ├── middleware/
+│   └── model/
+├── go.mod
+└── go.sum
+```
+
+### Dependencies
+
+Keep dependencies minimal. The standard library provides most of what you need:
+
+```go
+go mod init github.com/example/myapi
+```
+
+## Routing
+
+Go 1.22+ includes an improved `http.ServeMux` with method and path parameter support.
+
+### Basic Routes
+
+```go
+mux := http.NewServeMux()
+mux.HandleFunc("GET /api/users", listUsers)
+mux.HandleFunc("POST /api/users", createUser)
+mux.HandleFunc("GET /api/users/{id}", getUser)
+```
+
+### Path Parameters
+
+Extract path parameters using `r.PathValue()`:
+
+```go
+func getUser(w http.ResponseWriter, r *http.Request) {
+    id := r.PathValue("id")
+    // fetch user by id...
+}
+```
+
+## Middleware
+
+Middleware wraps handlers to add cross-cutting concerns like logging, auth, and CORS.
+
+### Logging Middleware
+
+```go
+func loggingMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        start := time.Now()
+        next.ServeHTTP(w, r)
+        log.Printf("%s %s %v", r.Method, r.URL.Path, time.Since(start))
+    })
+}
+```
+
+### Authentication Middleware
+
+```go
+func authMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        token := r.Header.Get("Authorization")
+        if !isValidToken(token) {
+            http.Error(w, "unauthorized", http.StatusUnauthorized)
+            return
+        }
+        next.ServeHTTP(w, r)
+    })
+}
+```
+
+### CORS Middleware
+
+Handle Cross-Origin Resource Sharing for frontend clients:
+
+```go
+func corsMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.Header().Set("Access-Control-Allow-Origin", "*")
+        w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+        if r.Method == "OPTIONS" {
+            w.WriteHeader(http.StatusOK)
+            return
+        }
+        next.ServeHTTP(w, r)
+    })
+}
+```
+
+## Error Handling
+
+Consistent error responses make your API easier to consume.
+
+### Error Response Format
+
+```go
+type APIError struct {
+    Code    int    `json:"code"`
+    Message string `json:"message"`
+}
+
+func writeError(w http.ResponseWriter, code int, msg string) {
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(code)
+    json.NewEncoder(w).Encode(APIError{Code: code, Message: msg})
+}
+```
+
+### Validation Errors
+
+Return structured validation errors for bad requests:
+
+```go
+func validateUser(u User) []string {
+    var errs []string
+    if u.Name == "" {
+        errs = append(errs, "name is required")
+    }
+    if u.Email == "" {
+        errs = append(errs, "email is required")
+    }
+    return errs
+}
+```
+
+## Testing
+
+Write tests for your handlers using `httptest`.
+
+### Handler Tests
+
+```go
+func TestGetUser(t *testing.T) {
+    req := httptest.NewRequest("GET", "/api/users/1", nil)
+    w := httptest.NewRecorder()
+    getUser(w, req)
+
+    if w.Code != http.StatusOK {
+        t.Errorf("expected 200, got %d", w.Code)
+    }
+}
+```
+
+### Integration Tests
+
+Test the full request lifecycle:
+
+```go
+func TestCreateUser(t *testing.T) {
+    body := `{"name": "Alice", "email": "alice@example.com"}`
+    req := httptest.NewRequest("POST", "/api/users", strings.NewReader(body))
+    req.Header.Set("Content-Type", "application/json")
+    w := httptest.NewRecorder()
+    createUser(w, req)
+
+    if w.Code != http.StatusCreated {
+        t.Errorf("expected 201, got %d", w.Code)
+    }
+}
+```
+
+## Deployment
+
+### Docker
+
+```dockerfile
+FROM golang:1.22-alpine AS builder
+WORKDIR /app
+COPY go.* ./
+RUN go mod download
+COPY . .
+RUN go build -o server ./cmd/server
+
+FROM alpine:3.19
+COPY --from=builder /app/server /server
+EXPOSE 8080
+CMD ["/server"]
+```
+
+### Configuration
+
+Use environment variables for production config:
+
+```go
+port := os.Getenv("PORT")
+if port == "" {
+    port = "8080"
+}
+log.Printf("Starting server on :%s", port)
+http.ListenAndServe(":"+port, mux)
+```
+
+## Summary
+
+Building REST APIs in Go is straightforward with the standard library. Focus on clean project structure, proper middleware chains, consistent error handling, and thorough testing.

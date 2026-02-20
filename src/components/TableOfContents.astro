@@ -1,0 +1,144 @@
+---
+/**
+ * TableOfContents — "On this page" sidebar built client-side
+ * from h2/h3 headings in the article `.prose` section.
+ * Mizu-style: parent bold, child muted, active = blue, hover = bold.
+ */
+---
+
+<aside class="toc-sidebar" id="toc-sidebar">
+  <div class="toc-title">On this page</div>
+  <nav id="toc-nav" class="toc-nav"></nav>
+</aside>
+
+<style is:global>
+  .toc-sidebar {
+    position: fixed;
+    top: 80px;
+    right: max(calc((100vw - 680px) / 2 - 260px), 20px);
+    width: 220px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    font-size: 0.82rem;
+    display: none;
+  }
+
+  /* Only show on wide screens */
+  @media (min-width: 1100px) {
+    .toc-sidebar {
+      display: block;
+    }
+  }
+
+  .toc-title {
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin-bottom: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .toc-title::before {
+    content: "≡";
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .toc-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* ── Parent links (h2) — bold, dark ── */
+  .toc-link {
+    display: block;
+    padding: 0.35rem 0;
+    text-decoration: none;
+    line-height: 1.45;
+    transition: color 0.15s, font-weight 0.1s;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  /* ── Child links (h3) — lighter, indented ── */
+  .toc-link[data-level="3"] {
+    padding-left: 1.1rem;
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: var(--color-text-muted);
+  }
+
+  /* ── Hover — bold text ── */
+  .toc-link:hover {
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .toc-link[data-level="3"]:hover {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  /* ── Active — blue highlight ── */
+  .toc-link.active {
+    color: #3b82f6 !important;
+    font-weight: 700;
+  }
+
+  .toc-link[data-level="3"].active {
+    color: #3b82f6 !important;
+    font-weight: 600;
+  }
+</style>
+
+<script is:inline>
+  document.addEventListener("DOMContentLoaded", () => {
+    const nav = document.getElementById("toc-nav");
+    const sidebar = document.getElementById("toc-sidebar");
+    if (!nav || !sidebar) return;
+
+    const prose = document.querySelector(".prose");
+    if (!prose) { sidebar.style.display = "none"; return; }
+
+    const headings = prose.querySelectorAll("h2, h3");
+    if (headings.length === 0) { sidebar.style.display = "none"; return; }
+
+    // Build TOC links
+    headings.forEach((h, i) => {
+      if (!h.id) h.id = "heading-" + i;
+      const a = document.createElement("a");
+      a.className = "toc-link";
+      a.href = "#" + h.id;
+      a.textContent = h.textContent.replace(/^\d+\.\s*/, ""); // strip numbered prefixes
+      a.dataset.level = h.tagName === "H3" ? "3" : "2";
+      nav.appendChild(a);
+    });
+
+    // Scroll spy
+    const links = nav.querySelectorAll(".toc-link");
+    let ticking = false;
+
+    function updateActive() {
+      let current = 0;
+      headings.forEach((h, i) => {
+        if (h.getBoundingClientRect().top <= 100) current = i;
+      });
+      links.forEach((l, i) => l.classList.toggle("active", i === current));
+    }
+
+    window.addEventListener("scroll", () => {
+      if (!ticking) {
+        requestAnimationFrame(() => { updateActive(); ticking = false; });
+        ticking = true;
+      }
+    });
+
+    updateActive();
+  });
+</script>

@@ -1,0 +1,85 @@
+---
+title: "Setting Up a Go Project with Air for Live Reload"
+description: "How to set up a productive Go development environment using Air for automatic hot reloading."
+pubDate: 2026-02-08
+tags: ["go", "tooling"]
+---
+
+## The Problem
+
+During Go development, you constantly edit code, stop the server, rebuild, and restart. This cycle breaks your flow.
+
+**Air** watches your files and automatically rebuilds and restarts your application on changes.
+
+## Installation
+
+```bash
+go install github.com/air-verse/air@latest
+```
+
+Make sure `$GOPATH/bin` is in your PATH.
+
+## Configuration
+
+Create a `.air.toml` in your project root:
+
+```toml
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/main ."
+  bin = "./tmp/main"
+  delay = 1000
+  include_ext = ["go", "html", "css", "js"]
+  exclude_dir = ["tmp", "vendor", "node_modules"]
+
+[screen]
+  clear_on_rebuild = true
+
+[log]
+  time = true
+```
+
+## Usage
+
+Simply run `air` in your project directory:
+
+```bash
+$ air
+
+  __    _   ___
+ / /\  | | | |_)
+/_/--\ |_| |_| \_ v1.51.0
+
+watching .
+building...
+running...
+```
+
+Now every time you save a `.go` file, Air will rebuild and restart your server automatically.
+
+## Project Structure
+
+A typical project setup with Air looks like:
+
+```
+myapp/
+├── .air.toml
+├── cmd/
+│   └── server/
+│       └── main.go
+├── internal/
+│   ├── handler/
+│   └── service/
+├── go.mod
+└── go.sum
+```
+
+## Tips
+
+- Add `tmp/` to your `.gitignore`
+- Use `--build.cmd` flag to override the build command
+- Combine with `make` for more complex build steps
+
+Air is a small tool that makes a big difference in your daily Go development workflow.

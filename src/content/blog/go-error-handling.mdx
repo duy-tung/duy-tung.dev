@@ -1,0 +1,81 @@
+---
+title: "Go Error Handling Patterns"
+description: "Common patterns for handling errors in Go — wrapping, sentinel errors, and custom error types."
+pubDate: 2026-02-18
+tags: ["go", "backend"]
+---
+
+## Why Error Handling Matters
+
+Go's explicit error handling is one of its defining features. Unlike languages that use exceptions, Go treats errors as values. This makes error flows visible and forces developers to handle failures at every step.
+
+```go
+f, err := os.Open("config.yaml")
+if err != nil {
+    return fmt.Errorf("open config: %w", err)
+}
+defer f.Close()
+```
+
+## Sentinel Errors
+
+Sentinel errors are package-level variables that represent specific, well-known error conditions.
+
+```go
+var ErrNotFound = errors.New("not found")
+
+func GetUser(id string) (*User, error) {
+    u, ok := store[id]
+    if !ok {
+        return nil, ErrNotFound
+    }
+    return u, nil
+}
+```
+
+Callers can then use `errors.Is` to check:
+
+```go
+if errors.Is(err, ErrNotFound) {
+    http.Error(w, "user not found", 404)
+}
+```
+
+## Error Wrapping
+
+Since Go 1.13, you can wrap errors to add context while preserving the original:
+
+```go
+func LoadConfig(path string) (*Config, error) {
+    data, err := os.ReadFile(path)
+    if err != nil {
+        return nil, fmt.Errorf("load config %s: %w", path, err)
+    }
+    // ...
+}
+```
+
+## Custom Error Types
+
+For richer error information, define a struct that implements the `error` interface:
+
+```go
+type ValidationError struct {
+    Field   string
+    Message string
+}
+
+func (e *ValidationError) Error() string {
+    return fmt.Sprintf("validation failed on %s: %s", e.Field, e.Message)
+}
+```
+
+## Summary
+
+| Pattern | Use When |
+|---|---|
+| Sentinel errors | Well-known, specific conditions |
+| `fmt.Errorf` with `%w` | Adding context to existing errors |
+| Custom types | Need structured error data |
+
+Good error handling makes debugging easier and your APIs more predictable.

@@ -1,0 +1,75 @@
+---
+title: "Hello World — Blog Setup Demo"
+description: "A sample post demonstrating MDX features: syntax highlighting, GFM tables, React islands, and more."
+pubDate: 2026-02-20
+tags: ["astro", "mdx", "demo"]
+---
+
+import Counter from "../../components/Counter.tsx";
+
+Welcome to my blog! This is a sample post to demonstrate all the rich content features available out of the box.
+
+## Code Highlighting
+
+Syntax highlighting powered by Shiki with dual themes (light & dark):
+
+```typescript
+interface BlogPost {
+  title: string;
+  pubDate: Date;
+  tags: string[];
+  draft: boolean;
+}
+
+function getRecentPosts(posts: BlogPost[], n = 5): BlogPost[] {
+  return posts
+    .filter((p) => !p.draft)
+    .sort((a, b) => b.pubDate.valueOf() - a.pubDate.valueOf())
+    .slice(0, n);
+}
+```
+
+And here's some inline code: `const x = 42;`
+
+## GFM Table
+
+| Feature            | Status |
+| ------------------ | ------ |
+| MDX Components     | ✅     |
+| Syntax Highlighting| ✅     |
+| Auto TOC           | ✅     |
+| Heading Anchors    | ✅     |
+| React Islands      | ✅     |
+| RSS Feed           | ✅     |
+| Sitemap            | ✅     |
+
+## React Island
+
+This interactive counter is a React component hydrated on the client via Astro's islands architecture:
+
+<Counter client:load />
+
+The surrounding content remains static HTML — zero JavaScript unless you opt in.
+
+## Blockquote
+
+> The best way to predict the future is to invent it.
+> — Alan Kay
+
+## Lists
+
+Things I like about Astro:
+
+- Content-first by default
+- Zero JS shipped unless you need it
+- Framework agnostic — use React, Vue, Svelte, or nothing
+- Built-in Markdown/MDX support
+- Excellent developer experience
+
+## External Link
+
+Check out the [Astro documentation](https://docs.astro.build) — this link opens in a new tab thanks to `rehype-external-links`.
+
+---
+
+That's it! Every feature you see above works out of the box with this blog setup.

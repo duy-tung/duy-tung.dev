@@ -1,0 +1,89 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Search from "@/components/Search.astro";
+import { getCollection } from "astro:content";
+import { getReadingTime } from "@/utils/reading-time";
+
+const POSTS_PER_PAGE = 5;
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+---
+
+<BaseLayout title="Blog" description="All blog posts by Duy Tung">
+  <a href="/" class="back-link">&larr; Home</a>
+  <h1 class="section-heading" style="margin: 1rem 0 1.5rem;">All Posts</h1>
+  <Search />
+  <ul class="post-list" id="post-list">
+    {posts.map((post) => (
+      <li class="post-item">
+        <a href={`/blog/${post.id}/`} class="post-title-link">
+          {post.data.title}
+        </a>
+        {post.data.description && (
+          <p class="post-excerpt">{post.data.description}</p>
+        )}
+        <div class="post-meta">
+          {post.data.tags && post.data.tags.map((tag: string) => (
+            <a href={`/tags/${tag}/`} class="tag-pill">{tag}</a>
+          ))}
+          <time class="post-date" datetime={post.data.pubDate.toISOString()}>
+            {formatDate(post.data.pubDate)}
+          </time>
+          {post.body && (
+            <span class="reading-time">&middot; {getReadingTime(post.body)}</span>
+          )}
+        </div>
+      </li>
+    ))}
+  </ul>
+
+  <!-- Pagination -->
+  {posts.length > POSTS_PER_PAGE && (
+    <nav class="pagination" id="pagination">
+      <button id="prev-btn" class="pagination-btn" disabled>&larr; Previous</button>
+      <span id="page-indicator" class="pagination-info">Page 1</span>
+      <button id="next-btn" class="pagination-btn">Next &rarr;</button>
+    </nav>
+  )}
+
+  <script is:inline define:vars={{ POSTS_PER_PAGE }}>
+    document.addEventListener("DOMContentLoaded", () => {
+      const list = document.getElementById("post-list");
+      if (!list) return;
+      const items = Array.from(list.querySelectorAll(".post-item"));
+      const total = items.length;
+      const perPage = POSTS_PER_PAGE;
+      if (total <= perPage) return;
+
+      let page = 1;
+      const totalPages = Math.ceil(total / perPage);
+      const prev = document.getElementById("prev-btn");
+      const next = document.getElementById("next-btn");
+      const indicator = document.getElementById("page-indicator");
+
+      function render() {
+        const start = (page - 1) * perPage;
+        const end = start + perPage;
+        items.forEach((item, i) => {
+          item.style.display = (i >= start && i < end) ? "" : "none";
+        });
+        if (prev) prev.disabled = page <= 1;
+        if (next) next.disabled = page >= totalPages;
+        if (indicator) indicator.textContent = `Page ${page} of ${totalPages}`;
+      }
+
+      render();
+
+      if (prev) prev.addEventListener("click", () => { if (page > 1) { page--; render(); } });
+      if (next) next.addEventListener("click", () => { if (page < totalPages) { page++; render(); } });
+    });
+  </script>
+</BaseLayout>

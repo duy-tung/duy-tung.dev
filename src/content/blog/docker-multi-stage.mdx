@@ -1,0 +1,66 @@
+---
+title: "Docker Multi-Stage Builds"
+description: "How to use multi-stage Docker builds to create small, optimized container images for Go applications."
+pubDate: 2026-02-15
+tags: ["docker", "devops", "go"]
+---
+
+## The Problem with Single-Stage Builds
+
+A typical Go Docker image built with a single stage can be over 1GB because it includes the entire Go toolchain, source code, and build cache — none of which are needed at runtime.
+
+```dockerfile
+# ❌ Single-stage: image is ~1.2GB
+FROM golang:1.22
+WORKDIR /app
+COPY . .
+RUN go build -o server .
+CMD ["./server"]
+```
+
+## Multi-Stage to the Rescue
+
+Multi-stage builds let you use one stage for building and another for running:
+
+```dockerfile
+# ✅ Multi-stage: image is ~15MB
+FROM golang:1.22-alpine AS builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o server .
+
+FROM alpine:3.19
+RUN apk --no-cache add ca-certificates
+COPY --from=builder /app/server /server
+EXPOSE 8080
+CMD ["/server"]
+```
+
+## Even Smaller with `scratch`
+
+For fully static binaries, you can use the `scratch` base image (literally empty):
+
+```dockerfile
+FROM scratch
+COPY --from=builder /app/server /server
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+EXPOSE 8080
+CMD ["/server"]
+```
+
+This produces images as small as **5–10MB**.
+
+## Build Arguments and Caching
+
+Use build arguments for versioning and leverage Docker's layer caching:
+
+```dockerfile
+ARG VERSION=dev
+RUN go build -ldflags="-X main.version=${VERSION}" -o server .
+```
+
+## Summary
+
+Multi-stage builds are essential for production Go containers. They reduce image size by 100x, minimize the attack surface, and speed up deployments.

@@ -1,6 +1,7 @@
 {
   "name": "duy-tung.dev",
   "type": "module",
+  "packageManager": "pnpm@10.30.1",
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",

@@ -118,11 +118,20 @@ const searchData = JSON.stringify(
       const indicator = document.getElementById("page-indicator");
 
       function render() {
+        // Fix scroll jumping by keeping min-height stable
+        list.style.minHeight = `${list.getBoundingClientRect().height}px`;
+        
         const start = (page - 1) * perPage;
         const end = start + perPage;
         items.forEach((item, i) => {
           item.style.display = (i >= start && i < end) ? "" : "none";
         });
+        
+        // Let browser repaint, then remove fixed min-height to compute new size
+        requestAnimationFrame(() => {
+            list.style.minHeight = '';
+        });
+
         if (prev) prev.disabled = page <= 1;
         if (next) next.disabled = page >= totalPages;
         if (indicator) indicator.textContent = `Page ${page} of ${totalPages}`;

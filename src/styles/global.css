@@ -157,6 +157,7 @@ a:hover {
 }
 
 .post-item {
+  position: relative;
   padding: 1.25rem 1rem;
   margin: 0 -1rem;
   border-radius: 8px;
@@ -186,6 +187,18 @@ a:hover {
   color: var(--color-text);
   text-decoration: none;
   line-height: 1.35;
+  display: inline-block;
+}
+
+/* Make entire post-item clickable */
+.post-title-link::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
 }
 
 .post-title-link:hover {
@@ -221,6 +234,8 @@ a:hover {
 
 /* ── Tag Pills (huy.rocks) ── */
 .tag-pill {
+  position: relative;
+  z-index: 2;
   display: inline-block;
   font-family: var(--font-mono);
   font-size: 0.72rem;

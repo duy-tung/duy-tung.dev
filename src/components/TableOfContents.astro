@@ -98,16 +98,22 @@
 </style>
 
 <script is:inline>
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("astro:page-load", () => {
     const nav = document.getElementById("toc-nav");
     const sidebar = document.getElementById("toc-sidebar");
     if (!nav || !sidebar) return;
 
+    // Clear previous TOC items (important for ViewTransitions)
+    nav.innerHTML = "";
+    
     const prose = document.querySelector(".prose");
     if (!prose) { sidebar.style.display = "none"; return; }
 
     const headings = prose.querySelectorAll("h2, h3");
     if (headings.length === 0) { sidebar.style.display = "none"; return; }
+
+    // Make sure sidebar is visible if we have headings
+    sidebar.style.display = "block";
 
     // Build TOC links
     headings.forEach((h, i) => {

@@ -4,6 +4,8 @@ import Search from "@/components/Search.astro";
 import Newsletter from "@/components/Newsletter.astro";
 import { getCollection } from "astro:content";
 import { getReadingTime } from "@/utils/reading-time";
+import { Image } from "astro:assets";
+import avatarImg from "@/assets/avatar.png";
 
 const POSTS_PER_PAGE = 5;
 
@@ -34,7 +36,7 @@ const searchData = JSON.stringify(
 <BaseLayout title="Home" description="Personal technical blog by Duy Tung — writings about software engineering, Go, and systems.">
   <!-- Profile Section -->
   <section class="profile-section">
-    <img src="/avatar.png" alt="Duy Tung" class="profile-avatar" />
+    <Image src={avatarImg} alt="Duy Tung" class="profile-avatar" width={160} height={160} />
     <div class="profile-info">
       <h1 class="profile-name">Duy Tung</h1>
       <p class="profile-bio">

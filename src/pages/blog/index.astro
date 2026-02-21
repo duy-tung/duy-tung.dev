@@ -55,7 +55,7 @@ const formatDate = (date: Date) =>
   )}
 
   <script is:inline define:vars={{ POSTS_PER_PAGE }}>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("astro:page-load", () => {
       const list = document.getElementById("post-list");
       if (!list) return;
       const items = Array.from(list.querySelectorAll(".post-item"));
@@ -82,8 +82,12 @@ const formatDate = (date: Date) =>
 
       render();
 
-      if (prev) prev.addEventListener("click", () => { if (page > 1) { page--; render(); } });
-      if (next) next.addEventListener("click", () => { if (page < totalPages) { page++; render(); } });
+      if (prev) {
+        prev.onclick = () => { if (page > 1) { page--; render(); } };
+      }
+      if (next) {
+        next.onclick = () => { if (page < totalPages) { page++; render(); } };
+      }
     });
   </script>
 </BaseLayout>

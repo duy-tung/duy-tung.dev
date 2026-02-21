@@ -12,6 +12,10 @@ import remarkGfm from "remark-gfm";
 export default defineConfig({
     site: "https://duy-tung.dev",
 
+    build: {
+        inlineStylesheets: "always",
+    },
+
     integrations: [mdx(), sitemap(), react()],
 
     markdown: {

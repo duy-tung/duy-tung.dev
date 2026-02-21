@@ -20,24 +20,36 @@ const { title, description = "Personal technical blog by Duy Tung", image } = As
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
 
-    <!-- Prevent flash of wrong theme -->
+    <!-- Prevent flash of wrong theme and enforce persistence -->
     <script is:inline>
       const setDarkMode = () => {
         const theme = (() => {
-          const stored = localStorage.getItem("theme");
-          if (stored === "dark" || stored === "light") return stored;
-          return window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light";
+          if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
+            return localStorage.getItem("theme");
+          }
+          return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
         })();
+        
         if (theme === "dark") {
           document.documentElement.classList.add("dark");
         } else {
           document.documentElement.classList.remove("dark");
         }
+        
+        if (typeof localStorage !== "undefined") {
+          localStorage.setItem("theme", theme);
+        }
       };
+      
       setDarkMode();
       document.addEventListener("astro:after-swap", setDarkMode);
+
+      // Sync theme across tabs actively 
+      window.addEventListener("storage", (event) => {
+        if (event.key === "theme") {
+          setDarkMode();
+        }
+      });
     </script>
 
     <!-- SEO -->

@@ -22,12 +22,22 @@ const { title, description = "Personal technical blog by Duy Tung", image } = As
 
     <!-- Prevent flash of wrong theme -->
     <script is:inline>
-      (function () {
-        const t = localStorage.getItem("theme");
-        if (t === "dark" || (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      const setDarkMode = () => {
+        const theme = (() => {
+          const stored = localStorage.getItem("theme");
+          if (stored === "dark" || stored === "light") return stored;
+          return window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        })();
+        if (theme === "dark") {
           document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
         }
-      })();
+      };
+      setDarkMode();
+      document.addEventListener("astro:after-swap", setDarkMode);
     </script>
 
     <!-- SEO -->

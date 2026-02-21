@@ -69,4 +69,66 @@ const formatDate = (date: Date) =>
   </article>
   <Newsletter />
   <TableOfContents />
+
+  <script is:inline>
+    document.addEventListener("astro:page-load", () => {
+      const preElements = document.querySelectorAll(".prose pre");
+      
+      preElements.forEach((pre) => {
+        if (pre.parentElement.classList.contains("code-wrapper")) return;
+
+        let lang = "text";
+        if (pre.hasAttribute("data-language")) {
+          lang = pre.getAttribute("data-language");
+        } else {
+          const classes = Array.from(pre.classList);
+          const langClass = classes.find(c => c.startsWith("language-"));
+          if (langClass) lang = langClass.replace("language-", "");
+        }
+        
+        const wrapper = document.createElement("div");
+        wrapper.className = "code-wrapper";
+        
+        const header = document.createElement("div");
+        header.className = "code-header";
+        
+        const langSpan = document.createElement("span");
+        langSpan.className = "code-lang";
+        langSpan.textContent = lang;
+        
+        const copyBtn = document.createElement("button");
+        copyBtn.className = "code-copy-btn";
+        copyBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          Copy
+        `;
+        
+        copyBtn.addEventListener("click", async () => {
+          const codeText = pre.innerText || pre.textContent;
+          try {
+            await navigator.clipboard.writeText(codeText);
+            copyBtn.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Copied!
+            `;
+            setTimeout(() => {
+              copyBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy
+              `;
+            }, 2000);
+          } catch (err) {
+            console.error("Failed to copy code: ", err);
+          }
+        });
+        
+        header.appendChild(langSpan);
+        header.appendChild(copyBtn);
+        
+        pre.parentNode.insertBefore(wrapper, pre);
+        wrapper.appendChild(header);
+        wrapper.appendChild(pre);
+      });
+    });
+  </script>
 </BaseLayout>

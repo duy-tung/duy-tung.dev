@@ -21,6 +21,17 @@
     overflow-y: auto;
     font-size: 0.82rem;
     display: none;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  }
+
+  html.dark .toc-sidebar {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
   }
 
   /* Only show on wide screens */
@@ -53,47 +64,52 @@
     display: flex;
     flex-direction: column;
     gap: 0;
+    position: relative;
+    border-left: 1px solid var(--color-border);
+    margin-left: 2px;
   }
 
   /* ── Parent links (h2) — bold, dark ── */
   .toc-link {
     display: block;
-    padding: 0.35rem 0;
+    padding: 0.35rem 0.5rem 0.35rem 0.75rem;
     text-decoration: none;
     line-height: 1.45;
-    transition: color 0.15s, font-weight 0.1s;
-    font-weight: 600;
-    color: var(--color-text);
+    transition: color 0.15s, font-weight 0.1s, background-color 0.15s, border-left-color 0.15s;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    border-left: 2px solid transparent;
+    margin-left: -1px;
+    border-radius: 0 4px 4px 0;
   }
 
   /* ── Child links (h3) — lighter, indented ── */
   .toc-link[data-level="3"] {
-    padding-left: 1.1rem;
+    padding-left: 1.5rem;
     font-size: 0.78rem;
     font-weight: 400;
-    color: var(--color-text-muted);
   }
 
-  /* ── Hover — bold text ── */
+  /* ── Hover ── */
   .toc-link:hover {
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text);
+    background-color: var(--color-bg-alt);
   }
 
   .toc-link[data-level="3"]:hover {
-    font-weight: 600;
-    color: var(--color-text);
+    font-weight: 500;
   }
 
-  /* ── Active — blue highlight ── */
+  /* ── Active — blue highlight with left border ── */
   .toc-link.active {
-    color: #3b82f6 !important;
-    font-weight: 700;
+    color: var(--color-accent) !important;
+    font-weight: 600;
+    border-left-color: var(--color-accent);
   }
 
   .toc-link[data-level="3"].active {
-    color: #3b82f6 !important;
-    font-weight: 600;
+    font-weight: 500;
   }
 </style>
 

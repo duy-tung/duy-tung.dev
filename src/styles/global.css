@@ -11,10 +11,13 @@
   --color-link: #111827;
   --color-link-hover: #374151;
   --color-accent: #2563eb;
-  --color-code-bg: #f3f4f6;
-  --color-code-border: #e2e8f0;
+  --color-code-bg: rgba(243, 244, 246, 0.75);
+  --color-code-border: rgba(226, 232, 240, 0.8);
   --color-tag-bg: #f1f5f9;
   --color-tag-text: #475569;
+
+  --glass-bg: rgba(252, 252, 252, 0.65);
+  --glass-border: rgba(226, 232, 240, 0.5);
 
   --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
   --font-sans: "Geist", "Inter", system-ui, -apple-system, sans-serif;
@@ -33,7 +36,7 @@
 html {
   font-family: var(--font-sans);
   font-size: 16px;
-  line-height: 1.7;
+  line-height: 1.75;
   color: var(--color-text);
   background: var(--color-bg);
   -webkit-font-smoothing: antialiased;
@@ -158,13 +161,14 @@ a:hover {
   margin: 0 -1rem;
   border-radius: 8px;
   border-bottom: 1px solid var(--color-border);
-  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .post-item:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.01);
   background-color: var(--color-bg-alt);
   border-color: transparent;
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.08);
 }
 
 .post-item:first-child {
@@ -340,15 +344,66 @@ a:hover {
 }
 
 /* ── Code Blocks ── */
+.code-wrapper {
+  position: relative;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--color-code-border);
+  background: var(--color-code-bg);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--glass-border);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.code-lang {
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.code-copy-btn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.code-copy-btn:hover {
+  color: var(--color-text);
+  border-color: var(--color-text-muted);
+  background: var(--color-bg-alt);
+}
+
 .prose pre {
   font-family: var(--font-mono);
   font-size: 0.82rem;
   line-height: 1.65;
   padding: 0.9rem 1rem;
-  margin: 1.5rem 0;
-  background: var(--color-code-bg) !important;
-  border: 1px solid var(--color-code-border);
-  border-radius: 8px;
+  margin: 0;
+  background: transparent !important;
+  border: none;
+  border-radius: 0;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   max-width: 100%;
@@ -387,7 +442,7 @@ a:hover {
 
 /* ── Shiki Dual Theme ── */
 html .astro-code {
-  background-color: var(--color-code-bg) !important;
+  background-color: transparent !important;
 }
 
 html .astro-code span {
@@ -403,7 +458,7 @@ html.dark .astro-code span {
 }
 
 html.dark .astro-code {
-  background-color: #24283b !important;
+  background-color: transparent !important;
 }
 
 /* ── Tables ── */
@@ -504,10 +559,21 @@ html.dark {
   --color-link: #58a6ff;
   --color-link-hover: #79c0ff;
   --color-accent: #2f81f7;
-  --color-code-bg: #161b22;
-  --color-code-border: #30363d;
+  --color-code-bg: rgba(22, 27, 34, 0.75);
+  --color-code-border: rgba(48, 54, 61, 0.8);
   --color-tag-bg: #21262d;
   --color-tag-text: #8b949e;
+
+  --glass-bg: rgba(13, 17, 23, 0.65);
+  --glass-border: rgba(48, 54, 61, 0.5);
+}
+
+html.dark .post-item:hover {
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.4);
+}
+
+html.dark .code-wrapper {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
 }
 
 /* Smooth theme transition */

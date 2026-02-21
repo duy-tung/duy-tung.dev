@@ -63,8 +63,11 @@ const formatDate = (date: Date) =>
       const perPage = POSTS_PER_PAGE;
       if (total <= perPage) return;
 
-      let page = 1;
       const totalPages = Math.ceil(total / perPage);
+      const storageKey = "pagination-blog-page";
+      let page = parseInt(sessionStorage.getItem(storageKey) || "1", 10);
+      if (page < 1 || page > totalPages) page = 1;
+
       const prev = document.getElementById("prev-btn");
       const next = document.getElementById("next-btn");
       const indicator = document.getElementById("page-indicator");
@@ -78,6 +81,7 @@ const formatDate = (date: Date) =>
         if (prev) prev.disabled = page <= 1;
         if (next) next.disabled = page >= totalPages;
         if (indicator) indicator.textContent = `Page ${page} of ${totalPages}`;
+        sessionStorage.setItem(storageKey, page.toString());
       }
 
       render();

@@ -106,8 +106,11 @@ const searchData = JSON.stringify(
       const perPage = POSTS_PER_PAGE;
       if (total <= perPage) return;
 
-      let page = 1;
       const totalPages = Math.ceil(total / perPage);
+      const storageKey = "pagination-home-page";
+      let page = parseInt(sessionStorage.getItem(storageKey) || "1", 10);
+      if (page < 1 || page > totalPages) page = 1;
+
       const prev = document.getElementById("prev-btn");
       const next = document.getElementById("next-btn");
       const indicator = document.getElementById("page-indicator");
@@ -121,6 +124,7 @@ const searchData = JSON.stringify(
         if (prev) prev.disabled = page <= 1;
         if (next) next.disabled = page >= totalPages;
         if (indicator) indicator.textContent = `Page ${page} of ${totalPages}`;
+        sessionStorage.setItem(storageKey, page.toString());
       }
 
       render();

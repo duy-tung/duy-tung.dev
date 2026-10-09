@@ -18,11 +18,17 @@ const labels = {
 
 const primary =
   product.url && product.status ? { href: product.url, label: labels[product.status] } : undefined;
+const external = primary?.href.startsWith("http");
 ---
 
 <div class="cta-row">
   {primary ? (
-    <a href={primary.href} class="btn btn-primary" target="_blank" rel="noopener">
+    <a
+      href={primary.href}
+      class="btn btn-primary"
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener" : undefined}
+    >
       {primary.label} <span aria-hidden="true">&rarr;</span>
     </a>
   ) : (

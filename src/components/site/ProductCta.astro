@@ -1,0 +1,34 @@
+---
+import Todo from "@/components/site/Todo.astro";
+import { company } from "@/config/company";
+
+interface Props {
+  /** Show the secondary "Get in touch" button next to the primary one. */
+  withContact?: boolean;
+}
+
+const { withContact = true } = Astro.props;
+const { product } = company;
+
+const labels = {
+  waitlist: "Join the waitlist",
+  beta: "Try the beta",
+  live: `Try ${product.name ?? company.name}`,
+} as const;
+
+const primary =
+  product.url && product.status ? { href: product.url, label: labels[product.status] } : undefined;
+---
+
+<div class="cta-row">
+  {primary ? (
+    <a href={primary.href} class="btn btn-primary" target="_blank" rel="noopener">
+      {primary.label} <span aria-hidden="true">&rarr;</span>
+    </a>
+  ) : (
+    <Todo inline label="Primary CTA: set company.product.status and company.product.url" />
+  )}
+  {withContact && (
+    <a href="/contact/" class="btn btn-secondary">Get in touch</a>
+  )}
+</div>

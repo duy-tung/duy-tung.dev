@@ -1,0 +1,79 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import BuiltWithClaude from "@/components/site/BuiltWithClaude.astro";
+import FeatureGrid from "@/components/site/FeatureGrid.astro";
+import HowItWorks from "@/components/site/HowItWorks.astro";
+import ProductCta from "@/components/site/ProductCta.astro";
+import Todo from "@/components/site/Todo.astro";
+import { company } from "@/config/company";
+
+const { product } = company;
+const statusLabel = { beta: "Beta", live: "Live", waitlist: "Waitlist" } as const;
+---
+
+<BaseLayout
+  title={product.name ?? "Product"}
+  description={product.summary ?? `The product ${company.name} is building.`}
+>
+  <section class="page-header">
+    <p class="eyebrow">
+      Product
+      {product.status && <span class="status-badge">{statusLabel[product.status]}</span>}
+    </p>
+    <h1 class="hero-title">{product.name ?? company.name}</h1>
+    {!product.name && <Todo label="Product name (company.product.name)" />}
+    {!product.status && <Todo label="Product status: beta, live or waitlist (company.product.status)" />}
+    {product.summary ? (
+      <p class="hero-lead">{product.summary}</p>
+    ) : (
+      <Todo label="Product summary (company.product.summary)" />
+    )}
+    <ProductCta />
+  </section>
+
+  <section class="section" aria-label="Screenshots">
+    {product.screenshots.length > 0 ? (
+      <div class="screenshot-grid">
+        {product.screenshots.map((shot) => (
+          <img src={shot.src} alt={shot.alt} class="screenshot" loading="lazy" decoding="async" />
+        ))}
+      </div>
+    ) : (
+      <div class="screenshot-placeholder">
+        <Todo label="Product screenshots: add real images to public/screenshots/ (company.product.screenshots)" />
+      </div>
+    )}
+  </section>
+
+  <section class="section" aria-labelledby="details-heading">
+    <div class="split">
+      <div>
+        <p class="eyebrow">Overview</p>
+        <h2 id="details-heading" class="section-title">What it is</h2>
+      </div>
+      <div>
+        {product.details ? (
+          <p class="section-lead">{product.details}</p>
+        ) : (
+          <Todo label="Product details (company.product.details)" />
+        )}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="how-heading">
+    <p class="eyebrow">How it works</p>
+    <h2 id="how-heading" class="section-title">From start to finish</h2>
+    <HowItWorks />
+  </section>
+
+  <section class="section" aria-labelledby="features-heading">
+    <p class="eyebrow">Features</p>
+    <h2 id="features-heading" class="section-title">Key features</h2>
+    <FeatureGrid />
+  </section>
+
+  <section class="section" id="claude">
+    <BuiltWithClaude detailed />
+  </section>
+</BaseLayout>

@@ -1,155 +1,106 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import Search from "@/components/Search.astro";
-import Newsletter from "@/components/Newsletter.astro";
+import BuiltWithClaude from "@/components/site/BuiltWithClaude.astro";
+import FeatureGrid from "@/components/site/FeatureGrid.astro";
+import HowItWorks from "@/components/site/HowItWorks.astro";
+import ProductCta from "@/components/site/ProductCta.astro";
+import Todo from "@/components/site/Todo.astro";
+import { company } from "@/config/company";
 import { getCollection } from "astro:content";
-import { getReadingTime } from "@/utils/reading-time";
-import { Image } from "astro:assets";
-import avatarImg from "@/assets/avatar.png";
 
-const POSTS_PER_PAGE = 5;
-
-const allPosts = (await getCollection("blog", ({ data }) => !data.draft))
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const latestPosts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
 
 const formatDate = (date: Date) =>
-  date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
-// Pre-compute search data in frontmatter to avoid esbuild backtick parsing issues
-const codeBlockRe = /`{3}[\s\S]*?`{3}/g;
-const markdownRe = /[#*`>\-|_\[\](){}]/g;
-const searchData = JSON.stringify(
-  allPosts.map(post => ({
-    title: post.data.title,
-    desc: post.data.description || "",
-    body: (post.body || "").replace(codeBlockRe, "").replace(markdownRe, " ").replace(/\s+/g, " ").trim(),
-    href: "/blog/" + post.id + "/",
-    tags: post.data.tags || [],
-  }))
-);
+  date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 ---
 
-<BaseLayout title="Home" description="Personal technical blog by Duy Tung — writings about software engineering, Go, and systems.">
-  <!-- Profile Section -->
-  <section class="profile-section">
-    <Image src={avatarImg} alt="Duy Tung" class="profile-avatar" width={160} height={160} />
-    <div class="profile-info">
-      <h1 class="profile-name">Duy Tung</h1>
-      <p class="profile-bio">
-        A software engineer working mostly with Go and backend systems.
-        I write about things I learn and problems I solve.
-      </p>
-      <div class="profile-links">
-        <a href="https://github.com/duy-tung" target="_blank" rel="noopener" class="profile-link">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-          GitHub
-        </a>
-        <a href="https://linkedin.com/in/duy-tung" target="_blank" rel="noopener" class="profile-link">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-          LinkedIn
-        </a>
+<BaseLayout>
+  <!-- Hero -->
+  <section class="hero">
+    <p class="eyebrow">{company.industry} &middot; {company.location.city}</p>
+    <h1 class="hero-title">{company.pitch ?? company.name}</h1>
+    {!company.pitch && <Todo label="One-line pitch for the hero headline (company.pitch)" />}
+    {company.product.summary && <p class="hero-lead">{company.product.summary}</p>}
+    <ProductCta />
+  </section>
+
+  <!-- Problem -->
+  <section class="section" aria-labelledby="problem-heading">
+    <div class="split">
+      <div>
+        <p class="eyebrow">The problem</p>
+        <h2 id="problem-heading" class="section-title">What we're solving</h2>
+      </div>
+      <div>
+        {company.problem ? (
+          <p class="section-lead">{company.problem}</p>
+        ) : (
+          <Todo label="The problem we solve (company.problem)" />
+        )}
+        {company.audience ? (
+          <p class="section-lead"><strong>Who it's for:</strong> {company.audience}</p>
+        ) : (
+          <Todo label="Who we solve it for (company.audience)" />
+        )}
       </div>
     </div>
   </section>
 
-  <!-- Search data for full-content search -->
-  <script id="search-data" type="application/json" set:html={searchData} />
-
-  <!-- Posts Section -->
-  <section>
-    <h2 class="section-heading">All Posts</h2>
-    <Search />
-    <ul class="post-list" id="post-list">
-      {allPosts.map((post) => (
-        <li class="post-item">
-          <a href={`/blog/${post.id}/`} class="post-title-link">
-            {post.data.title}
-          </a>
-          {post.data.description && (
-            <p class="post-excerpt">{post.data.description}</p>
-          )}
-          <div class="post-meta">
-            {post.data.tags && post.data.tags.map((tag: string) => (
-              <a href={`/tags/${tag}/`} class="tag-pill">{tag}</a>
-            ))}
-            <time class="post-date" datetime={post.data.pubDate.toISOString()}>
-              {formatDate(post.data.pubDate)}
-            </time>
-            {post.body && (
-              <span class="reading-time">&middot; {getReadingTime(post.body)}</span>
-            )}
-          </div>
-        </li>
-      ))}
-    </ul>
-
-    <!-- Pagination -->
-    {allPosts.length > POSTS_PER_PAGE && (
-      <nav class="pagination" id="pagination">
-        <button id="prev-btn" class="pagination-btn" disabled>&larr; Previous</button>
-        <span id="page-indicator" class="pagination-info">Page 1</span>
-        <button id="next-btn" class="pagination-btn">Next &rarr;</button>
-      </nav>
-    )}
+  <!-- How it works -->
+  <section class="section" aria-labelledby="how-heading">
+    <p class="eyebrow">How it works</p>
+    <h2 id="how-heading" class="section-title">From start to finish</h2>
+    <HowItWorks />
   </section>
 
-  <Newsletter />
+  <!-- Features -->
+  <section class="section" aria-labelledby="features-heading">
+    <p class="eyebrow">Features</p>
+    <h2 id="features-heading" class="section-title">What {company.product.name ?? "the product"} does</h2>
+    <FeatureGrid />
+  </section>
 
-  <script is:inline define:vars={{ POSTS_PER_PAGE }}>
-    document.addEventListener("astro:page-load", () => {
-      const list = document.getElementById("post-list");
-      if (!list) return;
-      const items = Array.from(list.querySelectorAll(".post-item"));
-      const total = items.length;
-      const perPage = POSTS_PER_PAGE;
-      if (total <= perPage) return;
+  <!-- Built with Claude -->
+  <section class="section">
+    <BuiltWithClaude />
+  </section>
 
-      const totalPages = Math.ceil(total / perPage);
-      const storageKey = "pagination-home-page";
-      let page = parseInt(sessionStorage.getItem(storageKey) || "1", 10);
-      if (page < 1 || page > totalPages) page = 1;
+  <!-- From the blog (real posts only) -->
+  {latestPosts.length > 0 && (
+    <section class="section" aria-labelledby="blog-heading">
+      <div class="section-header-row">
+        <div>
+          <p class="eyebrow">Blog</p>
+          <h2 id="blog-heading" class="section-title">Latest writing</h2>
+        </div>
+        <a href="/blog/" class="text-link">All posts <span aria-hidden="true">&rarr;</span></a>
+      </div>
+      <ul class="card-grid">
+        {latestPosts.map((post) => (
+          <li class="card card-link">
+            <time class="card-meta" datetime={post.data.pubDate.toISOString()}>
+              {formatDate(post.data.pubDate)}
+            </time>
+            <h3 class="card-title">
+              <a href={`/blog/${post.id}/`}>{post.data.title}</a>
+            </h3>
+            {post.data.description && <p class="card-text">{post.data.description}</p>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
 
-      const prev = document.getElementById("prev-btn");
-      const next = document.getElementById("next-btn");
-      const indicator = document.getElementById("page-indicator");
-
-      function render() {
-        const nav = document.getElementById("pagination");
-        let prevNavTop = 0;
-        if (nav) {
-          prevNavTop = nav.getBoundingClientRect().top;
-        }
-
-        const start = (page - 1) * perPage;
-        const end = start + perPage;
-        items.forEach((item, i) => {
-          item.style.display = (i >= start && i < end) ? "" : "none";
-        });
-        
-        // Restore scroll position so the pagination buttons stay directly beneath the cursor
-        if (nav) {
-          const newNavTop = nav.getBoundingClientRect().top;
-          window.scrollBy(0, newNavTop - prevNavTop);
-        }
-
-        if (prev) prev.disabled = page <= 1;
-        if (next) next.disabled = page >= totalPages;
-        if (indicator) indicator.textContent = `Page ${page} of ${totalPages}`;
-        sessionStorage.setItem(storageKey, page.toString());
-      }
-
-      render();
-
-      if (prev) {
-        prev.onclick = () => { if (page > 1) { page--; render(); } };
-      }
-      if (next) {
-        next.onclick = () => { if (page < totalPages) { page++; render(); } };
-      }
-    });
-  </script>
+  <!-- Closing CTA -->
+  <section class="section cta-band">
+    <h2 class="section-title">Talk to {company.founder.name}</h2>
+    <p class="section-lead">
+      Questions, feedback or partnership ideas: get in touch with the founder directly.
+    </p>
+    <div class="cta-row">
+      <a href="/contact/" class="btn btn-primary">Contact us <span aria-hidden="true">&rarr;</span></a>
+    </div>
+  </section>
 </BaseLayout>

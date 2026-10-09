@@ -1,0 +1,19 @@
+---
+import Todo from "@/components/site/Todo.astro";
+import { company } from "@/config/company";
+
+const { features } = company.product;
+---
+
+{features.length > 0 ? (
+  <ul class="card-grid">
+    {features.map((feature) => (
+      <li class="card">
+        <h3 class="card-title">{feature.title}</h3>
+        <p class="card-text">{feature.description}</p>
+      </li>
+    ))}
+  </ul>
+) : (
+  <Todo label="Key features: shipped features only (company.product.features)" />
+)}

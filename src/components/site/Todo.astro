@@ -1,0 +1,23 @@
+---
+/**
+ * Visible, clearly marked placeholder for content that is not written yet.
+ * Fill the matching field in src/config/company.ts to make it disappear.
+ * `pnpm check:site` lists every one still rendered in dist/.
+ */
+interface Props {
+  /** What is missing, e.g. "One-line pitch (company.pitch)". */
+  label: string;
+  inline?: boolean;
+  /** Emit only the HTML comment (for chrome like the footer). */
+  silent?: boolean;
+}
+
+const { label, inline = false, silent = false } = Astro.props;
+const Tag = inline ? "span" : "div";
+---
+
+<Fragment set:html={`<!-- TODO: ${label.replace(/--/g, "-")} -->`} />
+{!silent && (<Tag class:list={["todo", { "todo-inline": inline }]} data-todo={label}>
+  <span class="todo-badge">TODO</span>
+  <span class="todo-text">{label}</span>
+</Tag>)}

@@ -1,0 +1,20 @@
+---
+import Todo from "@/components/site/Todo.astro";
+import { company } from "@/config/company";
+
+const { steps } = company.product;
+---
+
+{steps.length > 0 ? (
+  <ol class="steps">
+    {steps.map((step, i) => (
+      <li class="step">
+        <span class="step-number" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+        <h3 class="card-title">{step.title}</h3>
+        <p class="card-text">{step.description}</p>
+      </li>
+    ))}
+  </ol>
+) : (
+  <Todo label="How it works: 3–4 real steps (company.product.steps)" />
+)}

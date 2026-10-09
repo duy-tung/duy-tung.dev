@@ -33,8 +33,8 @@ const formatDate = (date: Date) =>
   });
 ---
 
-<BaseLayout title={`#${tag}`} description={`Posts tagged with "${tag}"`}>
-  <a href="/blog" class="back-link">&larr; All Posts</a>
+<BaseLayout title={`#${tag}`} description={`Blog posts tagged with "${tag}"`} width="narrow">
+  <a href="/blog/" class="back-link">&larr; All Posts</a>
   <h1 class="section-heading" style="margin: 1rem 0;">
     Posts tagged <span class="tag-pill" style="font-size: 0.85rem;">{tag}</span>
   </h1>
@@ -52,7 +52,7 @@ const formatDate = (date: Date) =>
         )}
         <div class="post-meta">
           {post.data.tags && post.data.tags.map((t: string) => (
-            <a href={`/tags/${t}/`} class="tag-pill">{t}</a>
+            <a href={`/blog/tags/${t}/`} class="tag-pill">{t}</a>
           ))}
           <time class="post-date" datetime={post.data.pubDate.toISOString()}>
             {formatDate(post.data.pubDate)}

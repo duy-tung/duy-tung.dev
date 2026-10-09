@@ -1,20 +1,46 @@
 ---
 import "@/styles/global.css";
 import ThemeToggle from "@/components/ThemeToggle.astro";
+import LogoMark from "@/components/site/LogoMark.astro";
+import Todo from "@/components/site/Todo.astro";
+import { company, defaultDescription, displayLegalName, nav, social } from "@/config/company";
+import { organizationJsonLd } from "@/utils/structured-data";
 import { ViewTransitions } from "astro:transitions";
 
 interface Props {
-  title: string;
+  /** Page title; omit on the homepage to use the bare company name. */
+  title?: string;
   description?: string;
+  /** Social share image (absolute or root-relative). */
   image?: string;
+  type?: "website" | "article";
+  /** "wide" for company pages, "narrow" for long-form reading. */
+  width?: "wide" | "narrow";
+  /** Extra JSON-LD objects for this page. */
+  jsonLd?: Record<string, unknown>[];
 }
 
+const {
+  title,
+  description = defaultDescription,
+  // TODO: replace public/og-default.png with a designed share image.
+  image = "/og-default.png",
+  type = "website",
+  width = "wide",
+  jsonLd = [],
+} = Astro.props;
+
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const { title, description = "Personal technical blog by Duy Tung", image } = Astro.props;
+const fullTitle = title ? `${title} | ${company.name}` : company.name;
+const imageURL = new URL(image, Astro.site);
+const structuredData = [organizationJsonLd(), ...jsonLd];
+
+const path = Astro.url.pathname;
+const isActive = (href: string) => path === href || path.startsWith(href);
 ---
 
 <!doctype html>
-<html lang="vi">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -53,16 +79,30 @@ const { title, description = "Personal technical blog by Duy Tung", image } = As
     </script>
 
     <!-- SEO -->
-    <title>{title} | Duy Tung</title>
+    <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
+    <meta name="theme-color" content="#fcfcfc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)" />
 
-    <!-- Open Graph -->
-    <meta property="og:type" content="website" />
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={company.name} />
+    <meta property="og:locale" content="en_SG" />
     <meta property="og:url" content={canonicalURL} />
-    <meta property="og:title" content={`${title} | Duy Tung`} />
+    <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    {image && <meta property="og:image" content={new URL(image, Astro.url)} />}
+    <meta property="og:image" content={imageURL} />
+    <meta property="og:image:alt" content={company.name} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageURL} />
+
+    <!-- Structured data -->
+    {structuredData.map((data) => (
+      <script type="application/ld+json" set:html={JSON.stringify(data)} />
+    ))}
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -81,34 +121,54 @@ const { title, description = "Personal technical blog by Duy Tung", image } = As
     </noscript>
 
     <!-- RSS -->
-    <link rel="alternate" type="application/rss+xml" title="Duy Tung" href="/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title={`${company.name} Blog`} href="/rss.xml" />
 
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
-    <link rel="apple-touch-icon" href="/favicon.png" />
+    <!-- Icons. TODO: regenerate from the real logo (`pnpm icons`). -->
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <ViewTransitions />
   </head>
   <body>
+    <a href="#main" class="skip-link">Skip to content</a>
     <header class="site-header">
-      <div class="container">
-        <a href="/" class="site-name">duy-tung.dev</a>
-        <nav class="site-nav">
-          <a href="/blog">Blog</a>
-          <a href="/rss.xml">RSS</a>
+      <div class="container container-wide">
+        <a href="/" class="site-name" aria-label={`${company.name} home`}>
+          <LogoMark size={26} />
+          <span>{company.name}</span>
+        </a>
+        <nav class="site-nav" aria-label="Main">
+          {nav.map((item) => (
+            <a href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>
+              {item.label}
+            </a>
+          ))}
           <ThemeToggle />
         </nav>
       </div>
     </header>
 
-    <main class="container">
+    <main id="main" class:list={["container", { "container-wide": width === "wide" }]}>
       <slot />
     </main>
 
     <footer class="site-footer">
-      <div class="container">
-        <span>&copy; {new Date().getFullYear()} Duy Tung</span>
-        <nav class="site-nav">
-          <a href="https://github.com/duy-tung" target="_blank" rel="noopener">GitHub</a>
+      <div class="container container-wide">
+        <div class="footer-brand">
+          <span>&copy; {new Date().getFullYear()} {displayLegalName}</span>
+          {company.uen ? <span>UEN {company.uen}</span> : <Todo silent label="Show ACRA UEN in footer once issued (company.uen)" />}
+          <span>{company.location.city}</span>
+        </div>
+        <nav class="site-nav" aria-label="Footer">
+          {company.email ? (
+            <a href={`mailto:${company.email}`}>{company.email}</a>
+          ) : (
+            <Todo silent label="Contact email in footer (company.email)" />
+          )}
+          {social.linkedin && <a href={social.linkedin} target="_blank" rel="noopener">LinkedIn</a>}
+          {social.github && <a href={social.github} target="_blank" rel="noopener">GitHub</a>}
+          <a href="/rss.xml">RSS</a>
         </nav>
       </div>
     </footer>

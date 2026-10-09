@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Search from "@/components/Search.astro";
+import Newsletter from "@/components/Newsletter.astro";
+import { company } from "@/config/company";
 import { getCollection } from "astro:content";
 import { getReadingTime } from "@/utils/reading-time";
 
@@ -15,11 +17,37 @@ const formatDate = (date: Date) =>
     month: "long",
     day: "numeric",
   });
+
+// Pre-compute search data in frontmatter to avoid esbuild backtick parsing issues
+const codeBlockRe = /`{3}[\s\S]*?`{3}/g;
+const markdownRe = /[#*`>\-|_\[\](){}]/g;
+const searchData = JSON.stringify(
+  posts.map(post => ({
+    title: post.data.title,
+    desc: post.data.description || "",
+    body: (post.body || "").replace(codeBlockRe, "").replace(markdownRe, " ").replace(/\s+/g, " ").trim(),
+    href: "/blog/" + post.id + "/",
+    tags: post.data.tags || [],
+  }))
+);
 ---
 
-<BaseLayout title="Blog" description="All blog posts by Duy Tung">
-  <a href="/" class="back-link">&larr; Home</a>
-  <h1 class="section-heading" style="margin: 1rem 0 1.5rem;">All Posts</h1>
+<BaseLayout
+  title="Blog"
+  description={`Engineering notes by ${company.founder.name} on Go, backend systems, databases and tooling.`}
+  width="narrow"
+>
+  <header class="blog-header">
+    <h1 class="article-title">Blog</h1>
+    <p class="blog-intro">
+      Engineering notes by {company.founder.name}, {company.founder.role} of {company.name}.
+    </p>
+  </header>
+
+  <!-- Search data for full-content search -->
+  <script id="search-data" type="application/json" set:html={searchData} />
+
+  <h2 class="section-heading">All Posts</h2>
   <Search />
   <ul class="post-list" id="post-list">
     {posts.map((post) => (
@@ -32,7 +60,7 @@ const formatDate = (date: Date) =>
         )}
         <div class="post-meta">
           {post.data.tags && post.data.tags.map((tag: string) => (
-            <a href={`/tags/${tag}/`} class="tag-pill">{tag}</a>
+            <a href={`/blog/tags/${tag}/`} class="tag-pill">{tag}</a>
           ))}
           <time class="post-date" datetime={post.data.pubDate.toISOString()}>
             {formatDate(post.data.pubDate)}
@@ -107,4 +135,6 @@ const formatDate = (date: Date) =>
       }
     });
   </script>
+
+  <Newsletter />
 </BaseLayout>

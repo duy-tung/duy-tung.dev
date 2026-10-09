@@ -1,0 +1,51 @@
+---
+import Todo from "@/components/site/Todo.astro";
+import { company } from "@/config/company";
+
+interface Props {
+  /** Show model / API feature details (used on /product). */
+  detailed?: boolean;
+}
+
+const { detailed = false } = Astro.props;
+const { claude } = company;
+---
+
+<div class="claude-card">
+  <div>
+    <p class="eyebrow">Technology</p>
+    <h2 class="section-title">Built with Claude</h2>
+    <p class="section-lead">
+      {company.name} is built on Claude, the family of AI models developed by Anthropic.
+    </p>
+    {claude.powers ? (
+      <p class="section-lead">{claude.powers}</p>
+    ) : (
+      <Todo label="What Claude powers in the product (company.claude.powers)" />
+    )}
+    {!detailed && (
+      <a href="/product/#claude" class="text-link">How we use Claude <span aria-hidden="true">&rarr;</span></a>
+    )}
+  </div>
+
+  {detailed && (
+    <dl class="fact-list">
+      <div>
+        <dt>Models</dt>
+        <dd>
+          {claude.models.length > 0 ? claude.models.join(", ") : (
+            <Todo inline label="Claude model(s) used (company.claude.models)" />
+          )}
+        </dd>
+      </div>
+      <div>
+        <dt>API features</dt>
+        <dd>
+          {claude.apiFeatures.length > 0 ? claude.apiFeatures.join(", ") : (
+            <Todo inline label="Claude API features used (company.claude.apiFeatures)" />
+          )}
+        </dd>
+      </div>
+    </dl>
+  )}
+</div>

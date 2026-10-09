@@ -16,6 +16,11 @@ export default defineConfig({
         inlineStylesheets: "always",
     },
 
+    // Tag pages moved under /blog when the site became the company website.
+    redirects: {
+        "/tags/[tag]": "/blog/tags/[tag]",
+    },
+
     integrations: [mdx(), sitemap(), react()],
 
     markdown: {

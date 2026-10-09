@@ -1,0 +1,93 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Todo from "@/components/site/Todo.astro";
+import { company, locationLabel } from "@/config/company";
+import { Image } from "astro:assets";
+import avatarImg from "@/assets/avatar.png";
+
+const formatFounded = (iso: string) => {
+  const [year, month] = iso.split("-").map(Number);
+  return month
+    ? new Date(Date.UTC(year, month - 1, 1)).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        timeZone: "UTC",
+      })
+    : String(year);
+};
+---
+
+<BaseLayout
+  title="About"
+  description={`About ${company.name}: a ${company.industry.toLowerCase()} startup based in ${company.location.city}, founded by ${company.founder.name}.`}
+>
+  <section class="page-header">
+    <p class="eyebrow">About</p>
+    <h1 class="hero-title">About {company.name}</h1>
+    {company.story ? (
+      <p class="hero-lead">{company.story}</p>
+    ) : (
+      <Todo label="Company story: why Rungwise exists and how it started (company.story)" />
+    )}
+  </section>
+
+  <section class="section" aria-labelledby="facts-heading">
+    <h2 id="facts-heading" class="section-title">At a glance</h2>
+    <dl class="fact-list fact-grid">
+      <div>
+        <dt>Company</dt>
+        <dd>
+          {company.legalName ?? (
+            <Todo inline label="Legal name: set once ACRA incorporation is complete (company.legalName)" />
+          )}
+        </dd>
+      </div>
+      <div>
+        <dt>UEN</dt>
+        <dd>{company.uen ?? <Todo inline label="ACRA UEN (company.uen)" />}</dd>
+      </div>
+      <div>
+        <dt>Founded</dt>
+        <dd>
+          {company.foundingDate ? (
+            <time datetime={company.foundingDate}>{formatFounded(company.foundingDate)}</time>
+          ) : (
+            <Todo inline label="Founding month: actual ACRA registration date (company.foundingDate)" />
+          )}
+        </dd>
+      </div>
+      <div>
+        <dt>Headquarters</dt>
+        <dd>{locationLabel}</dd>
+      </div>
+      <div>
+        <dt>Industry</dt>
+        <dd>{company.industry}</dd>
+      </div>
+      {company.funding && (
+        <div>
+          <dt>Funding</dt>
+          <dd>{company.funding}</dd>
+        </div>
+      )}
+    </dl>
+  </section>
+
+  <section class="section" aria-labelledby="founder-heading">
+    <h2 id="founder-heading" class="section-title">Founder</h2>
+    <div class="founder-card">
+      <Image src={avatarImg} alt={company.founder.name} class="founder-avatar" width={128} height={128} />
+      <div>
+        <h3 class="founder-name">{company.founder.name}</h3>
+        <p class="founder-role">{company.founder.role}</p>
+        <p class="card-text">{company.founder.bio}</p>
+        <div class="link-row">
+          {company.founder.links.map((link) => (
+            <a href={link.url} target="_blank" rel="noopener" class="text-link">{link.label}</a>
+          ))}
+          <a href="/blog/" class="text-link">Blog</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

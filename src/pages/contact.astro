@@ -1,0 +1,64 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Todo from "@/components/site/Todo.astro";
+import { company, locationLabel, social } from "@/config/company";
+
+const { location } = company;
+---
+
+<BaseLayout
+  title="Contact"
+  description={`Get in touch with ${company.name}, a ${company.industry.toLowerCase()} startup based in ${location.city}.`}
+>
+  <section class="page-header">
+    <p class="eyebrow">Contact</p>
+    <h1 class="hero-title">Get in touch</h1>
+    <p class="hero-lead">
+      Questions about {company.name}, feedback or partnership ideas: reach out and you'll hear back
+      from {company.founder.name}, {company.founder.role}.
+    </p>
+  </section>
+
+  <section class="section">
+    <ul class="card-grid">
+      <li class="card">
+        <h2 class="card-title">Email</h2>
+        {company.email ? (
+          <p class="card-text"><a href={`mailto:${company.email}`}>{company.email}</a></p>
+        ) : (
+          <Todo label="Contact email (company.email)" />
+        )}
+      </li>
+      {social.linkedin && (
+        <li class="card">
+          <h2 class="card-title">LinkedIn</h2>
+          <p class="card-text">
+            <a href={social.linkedin} target="_blank" rel="noopener">
+              {social.linkedin.replace(/^https?:\/\/(www\.)?/, "")}
+            </a>
+          </p>
+        </li>
+      )}
+      {social.github && (
+        <li class="card">
+          <h2 class="card-title">GitHub</h2>
+          <p class="card-text">
+            <a href={social.github} target="_blank" rel="noopener">
+              {social.github.replace(/^https?:\/\//, "")}
+            </a>
+          </p>
+        </li>
+      )}
+      <li class="card">
+        <h2 class="card-title">Location</h2>
+        <address class="card-text">
+          {location.streetAddress && <>{location.streetAddress}<br /></>}
+          {locationLabel}{location.postalCode && ` ${location.postalCode}`}
+        </address>
+        {!location.streetAddress && (
+          <Todo silent label="Registered office address, if it should be public (company.location.streetAddress)" />
+        )}
+      </li>
+    </ul>
+  </section>
+</BaseLayout>

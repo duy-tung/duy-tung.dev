@@ -3,6 +3,7 @@ import BaseLayout from "./BaseLayout.astro";
 import TableOfContents from "@/components/TableOfContents.astro";
 import Newsletter from "@/components/Newsletter.astro";
 import { getReadingTime } from "@/utils/reading-time";
+import { blogPostingJsonLd } from "@/utils/structured-data";
 
 interface Props {
   title: string;
@@ -17,6 +18,17 @@ interface Props {
 const { title, description, pubDate, updatedDate, tags, heroImage, rawContent } = Astro.props;
 
 const readingTime = rawContent ? getReadingTime(rawContent) : null;
+const postURL = new URL(Astro.url.pathname, Astro.site).href;
+const jsonLd = [
+  blogPostingJsonLd({
+    title,
+    description,
+    url: postURL,
+    pubDate,
+    updatedDate,
+    image: heroImage ? new URL(heroImage, Astro.site).href : undefined,
+  }),
+];
 
 const formatDate = (date: Date) =>
   date.toLocaleDateString("en-US", {
@@ -26,15 +38,22 @@ const formatDate = (date: Date) =>
   });
 ---
 
-<BaseLayout title={title} description={description} image={heroImage}>
-  <a href="/" class="back-link">&larr; Home</a>
+<BaseLayout
+  title={title}
+  description={description}
+  image={heroImage}
+  type="article"
+  width="narrow"
+  jsonLd={jsonLd}
+>
+  <a href="/blog/" class="back-link">&larr; Blog</a>
 
   <article style="margin-top: 1rem;">
     <header class="article-header">
       {tags && tags.length > 0 && (
         <div style="display:flex;gap:0.4rem;margin-bottom:0.75rem">
           {tags.map((tag) => (
-            <a href={`/tags/${tag}/`} class="tag-pill">{tag}</a>
+            <a href={`/blog/tags/${tag}/`} class="tag-pill">{tag}</a>
           ))}
         </div>
       )}

@@ -129,7 +129,7 @@
     if (headings.length === 0) { sidebar.style.display = "none"; return; }
 
     // Make sure sidebar is visible if we have headings
-    sidebar.style.display = "block";
+    sidebar.style.display = ""; // let the CSS media query decide (hidden below 1100px)
 
     // Build TOC links
     headings.forEach((h, i) => {

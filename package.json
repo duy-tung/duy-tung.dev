@@ -9,6 +9,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
+    "check:site": "node scripts/check-site.mjs",
+    "icons": "node scripts/generate-icons.mjs",
     "lint": "biome check --write .",
     "format": "biome format --write ."
   },

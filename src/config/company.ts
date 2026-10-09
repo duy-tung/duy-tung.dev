@@ -59,6 +59,8 @@ export interface Company {
     summary?: string;
     /** Longer description for /product. */
     details?: string;
+    /** Areas the product covers. */
+    topics: string[];
     steps: Step[];
     features: Feature[];
     /** Paths under /public, e.g. "/screenshots/dashboard.png". */
@@ -94,8 +96,7 @@ export const company: Company = {
   industry: "Fintech",
   funding: "Bootstrapped",
   url: "https://duy-tung.dev",
-  // TODO: company contact email (e.g. hello@duy-tung.dev). Must be a real, monitored inbox.
-  email: undefined,
+  email: "tung@duy-tung.dev",
   location: {
     city: "Singapore",
     country: "Singapore",
@@ -104,23 +105,22 @@ export const company: Company = {
     streetAddress: undefined,
     postalCode: undefined,
   },
-  // TODO: one-line pitch.
-  pitch: undefined,
+  pitch: "Exclusive, personalized insights on investing, finance, careers, education and work, built for Gen Z.",
   // TODO: the problem we solve.
   problem: undefined,
-  // TODO: who we solve it for.
-  audience: undefined,
+  audience: "Gen Z.",
   // TODO: company story (why Rungwise exists, how it started).
   story: undefined,
   product: {
     // TODO: product name.
     name: undefined,
-    // TODO: "beta" | "live" | "waitlist".
-    status: undefined,
-    // TODO: product / waitlist link.
-    url: undefined,
-    // TODO: one-paragraph product summary.
-    summary: undefined,
+    status: "waitlist",
+    // Email sign-up until a dedicated waitlist form exists.
+    // TODO: replace with the waitlist form URL if one is set up.
+    url: "mailto:tung@duy-tung.dev?subject=Join%20the%20Rungwise%20waitlist",
+    summary:
+      "Rungwise provides exclusive, personalized information for Gen Z across investing, personal finance, careers, education and work. It is currently open for waitlist sign-ups.",
+    topics: ["Investing", "Personal finance", "Careers", "Education", "Work"],
     // TODO: longer product description for /product.
     details: undefined,
     // TODO: 3–4 real steps describing how the product works.

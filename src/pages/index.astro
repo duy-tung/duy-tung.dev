@@ -22,7 +22,6 @@ const formatDate = (date: Date) =>
     <p class="eyebrow">{company.industry} &middot; {company.location.city}</p>
     <h1 class="hero-title">{company.pitch ?? company.name}</h1>
     {!company.pitch && <Todo label="One-line pitch for the hero headline (company.pitch)" />}
-    {company.product.summary && <p class="hero-lead">{company.product.summary}</p>}
     <ProductCta />
   </section>
 

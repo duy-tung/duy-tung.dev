@@ -2,8 +2,14 @@
 import Todo from "@/components/site/Todo.astro";
 import { company } from "@/config/company";
 
-const { features } = company.product;
+const { features, topics } = company.product;
 ---
+
+{topics.length > 0 && (
+  <ul class="topic-list" aria-label="Topics covered">
+    {topics.map((topic) => <li class="topic-pill">{topic}</li>)}
+  </ul>
+)}
 
 {features.length > 0 ? (
   <ul class="card-grid">
